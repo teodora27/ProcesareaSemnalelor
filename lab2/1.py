@@ -9,7 +9,7 @@ ts = 1 / fs
 t = np.linspace(0, 1, int(fs)) 
 
 x_sin = A * np.sin(2 * np.pi * f * t + phi)
-x_cos = A * np.cos(2 * np.pi * f * t + phi)
+x_cos = A * np.cos(2 * np.pi * f * t + phi-np.pi/2)
 
 fig, axs = plt.subplots(2)
 
