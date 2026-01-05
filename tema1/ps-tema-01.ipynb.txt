@@ -6,7 +6,7 @@
    "source": [
     "# Pachete necesare pentru folosirea acestui Notebook\n",
     "\n",
-    "Vom folosi [scipy](https://scipy.org/), [numpy](https://numpy.org/) Či [matplotlib](https://matplotlib.org/)."
+    "Vom folosi [scipy](https://scipy.org/), [numpy](https://numpy.org/) și [matplotlib](https://matplotlib.org/)."
    ]
   },
   {
@@ -25,9 +25,9 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "# Imaginea cu care lucrÄm\n",
+    "# Imaginea cu care lucrăm\n",
     "\n",
-    "Vom folosi o imagine din setul de date oferit implicit de cÄtre scipy."
+    "Vom folosi o imagine din setul de date oferit implicit de către scipy."
    ]
   },
   {
@@ -71,12 +71,12 @@
     "              \\cos\\left[\\frac{\\pi}{N_2}m_2\\left(n_2 + \\frac12\\right)\\right]\n",
     "$$\n",
     "\n",
-    "* unde $n_1$ Či $n_2$ sunt poziČile pixelilor pe orizontalÄ, respectiv, pe verticalÄ\n",
-    "* bin-urile rezultate corespund poziČiilor pixelilor\n",
-    "* spectrul este ĂŽn continuare simetric Či par\n",
-    "* proprietÄČile transformatei DCT-II sunt respectate Či ĂŽn cazul celei 2D\n",
+    "* unde $n_1$ și $n_2$ sunt pozițile pixelilor pe orizontală, respectiv, pe verticală\n",
+    "* bin-urile rezultate corespund pozițiilor pixelilor\n",
+    "* spectrul este în continuare simetric și par\n",
+    "* proprietățile transformatei DCT-II sunt respectate și în cazul celei 2D\n",
     "\n",
-    "Ăn Python avem rutina `scipy.fft.dct` pentru 1D Či `scipy.fft.dctn` pentru generalizarea la semnale $n$-dimensionale. Dimensiunea este determinatÄ automat dupÄ forma semnalului; tipul DCT poate fi specificat prin atributul `type` (implicit II)."
+    "În Python avem rutina `scipy.fft.dct` pentru 1D și `scipy.fft.dctn` pentru generalizarea la semnale $n$-dimensionale. Dimensiunea este determinată automat după forma semnalului; tipul DCT poate fi specificat prin atributul `type` (implicit II)."
    ]
   },
   {
@@ -120,7 +120,7 @@
    "source": [
     "# Compactarea energiei. Compresie.\n",
     "\n",
-    "Putem profita de proprietatea compresiei energiei prin anularea frecvenČelor DCT ĂŽncepĂ˘nd cu *bin*-ul `k` dupÄ care aplicÄm transformata DCT inversÄ (similar cu tema anterioarÄ):"
+    "Putem profita de proprietatea compresiei energiei prin anularea frecvențelor DCT începând cu *bin*-ul `k` după care aplicăm transformata DCT inversă (similar cu tema anterioară):"
    ]
   },
   {
@@ -153,6 +153,7 @@
    ]
   },
   {
+   "attachments": {},
    "cell_type": "markdown",
    "metadata": {},
    "source": [
@@ -160,10 +161,10 @@
     "\n",
     "Algoritmul de compresie JPEG are patru etape:\n",
     "\n",
-    "1. transformarea imaginii din pixeli RGB ĂŽn Y'CbCr\n",
+    "1. transformarea imaginii din pixeli RGB în Y'CbCr\n",
     "2. aplicarea 2D-DCT pe blocuri disincte de 8x8 pixeli din imagine\n",
-    "3. cuantizarea ĂŽn frecvenČÄ cu $Q$ dat de standardul JPEG\n",
-    "4. opČional compresia rezultatului cu coduri Huffman\n",
+    "3. cuantizarea în frecvență cu $Q$ dat de standardul JPEG\n",
+    "4. compresia rezultatului cu coduri Huffman\n",
     "\n",
     "Unde matricea JPEG de cuantizare $Q$ este:\n",
     "$$\n",
@@ -180,7 +181,7 @@
     "\\end{bmatrix}\n",
     "$$\n",
     "\n",
-    "Imaginea noastrÄ de test este monocromÄ, deci nu necesitÄ pasul 1, dar putem efectua o operaČie de *down-sampling* ĂŽn preprocesare precum am prezentat la curs."
+    "Imaginea noastră de test este monocromă, deci nu necesită pasul 1, dar putem efectua o operație de *down-sampling* în preprocesare precum am prezentat la curs."
    ]
   },
   {
@@ -218,7 +219,7 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "Pentru fiecare bloc de $8\\times 8$ aplicÄ DCT Či cuantizare."
+    "Pentru fiecare bloc de $8\\times 8$ aplică DCT și cuantizare."
    ]
   },
   {
@@ -242,8 +243,8 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "Componente ĂŽn frecvenČÄ:64\n",
-      "Componente ĂŽn frecvenČÄ dupÄ cuantizare: 14\n"
+      "Componente în frecvență:64\n",
+      "Componente în frecvență după cuantizare: 14\n"
      ]
     }
    ],
@@ -275,23 +276,24 @@
     "plt.title('JPEG')\n",
     "plt.show()\n",
     "\n",
-    "print('Componente ĂŽn frecvenČÄ:' + str(y_nnz) + \n",
-    "      '\\nComponente ĂŽn frecvenČÄ dupÄ cuantizare: ' + str(y_jpeg_nnz))"
+    "print('Componente în frecvență:' + str(y_nnz) + \n",
+    "      '\\nComponente în frecvență după cuantizare: ' + str(y_jpeg_nnz))"
    ]
   },
   {
+   "attachments": {},
    "cell_type": "markdown",
    "metadata": {},
    "source": [
     "# Sarcini\n",
     "\n",
-    "1. [6p] CompletaČi algoritmul JPEG incluzĂ˘nd toate blocurile din imagine.\n",
+    "1. [6p] Completați algoritmul JPEG incluzând toate blocurile din imagine.\n",
     "\n",
-    "2. [4p] ExtindeČi la imagini color (incluzĂ˘nd transformarea din RGB ĂŽn Y'CbCr). ExemplificaČi pe `scipy.misc.face` folositÄ ĂŽn tema anterioarÄ.\n",
+    "2. [4p] Extindeți la imagini color (incluzând transformarea din RGB în Y'CbCr).\n",
     "\n",
-    "3. [6p] ExtindeČi algoritmul pentru compresia imaginii pĂ˘nÄ la un prag MSE impus de utilizator.\n",
+    "3. [6p] Extindeți algoritmul pentru compresia imaginii până la un prag MSE impus de utilizator.\n",
     "\n",
-    "4. [4p] ExtindeČi algoritmul pentru compresie video. DemonstraČi pe un clip scurt din care luaČi fiecare cadru Či ĂŽl trataČi ca pe o imagine."
+    "4. [4p] Extindeți algoritmul pentru compresie video. Demonstrați pe un clip scurt din care luați fiecare cadru și îl tratați ca pe o imagine."
    ]
   }
  ],
