@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import misc, ndimage
 from scipy.fft import dctn, idctn
+from heapq import heappush, heappop
+from collections import Counter
 
 X = misc.ascent()
 plt.imshow(X, cmap=plt.cm.gray)
@@ -36,7 +38,7 @@ plt.show()
 Q_down = 10
 
 X_jpeg = X.copy()
-X_jpeg = Q_down*np.round(X_jpeg/Q_down);
+X_jpeg = Q_down*np.round(X_jpeg/Q_down)
 
 plt.subplot(121).imshow(X, cmap=plt.cm.gray)
 plt.title('Original')
@@ -78,6 +80,75 @@ print('Componente in frecventa:' + str(y_nnz) +
 height, width = X.shape
 X_jpeg = np.zeros_like(X)
 
+def zigzag_order(N=8):
+    order = []
+    for s in range(2 * N - 1):  
+        if s % 2 == 0:
+            for i in range(min(s, N-1), max(-1, s-N), -1):
+                j = s - i
+                order.append((i, j))
+        else:
+            for i in range(max(0, s-(N-1)), min(s+1, N)):
+                j = s - i
+                order.append((i, j))
+    return order
+
+def zigzag_scan(block):
+    N = block.shape[0]
+    order = zigzag_order(N)
+    return np.array([block[i, j] for (i, j) in order])
+
+def inverse_zigzag(vec, N=8):
+    block = np.zeros((N, N))
+    order = zigzag_order(N)
+    for idx, (i, j) in enumerate(order):
+        block[i, j] = vec[idx]
+    return block
+
+def build_huffman_tree(freq):
+    heap = []
+    counter = 0  # tie-breaker
+
+    for symbol, weight in freq.items():
+        heappush(heap, (weight, counter, [[symbol, ""]]))
+        counter += 1
+
+    while len(heap) > 1:
+        w1, _, list1 = heappop(heap)
+        w2, _, list2 = heappop(heap)
+
+        for p in list1:
+            p[1] = "0" + p[1]
+        for p in list2:
+            p[1] = "1" + p[1]
+
+        heappush(heap, (w1 + w2, counter, list1 + list2))
+        counter += 1
+
+    return heappop(heap)[2]
+
+def huffman_encode(data):
+    freq = Counter(data)
+    huff = build_huffman_tree(freq)
+    codebook = {symbol: code for symbol, code in huff}
+    encoded = "".join(codebook[s] for s in data)
+    return encoded, codebook
+
+def huffman_decode(encoded, codebook):
+    inv = {v: k for k, v in codebook.items()}
+    decoded = []
+    buffer = ""
+
+    for bit in encoded:
+        buffer += bit
+        if buffer in inv:
+            decoded.append(inv[buffer])
+            buffer = ""
+    return decoded
+
+all_coeffs = [] 
+blocks_count = 0
+
 for i in range(0, height, 8):
     for j in range(0, width, 8):
         block = X[i:i+8, j:j+8]
@@ -85,6 +156,11 @@ for i in range(0, height, 8):
             continue  # ignora blocurile incomplete
         Y_block = dctn(block)
         Y_quant = Q_jpeg * np.round(Y_block / Q_jpeg)
+        
+        zz = zigzag_scan(Y_quant)
+        all_coeffs.extend(zz.tolist()) 
+        blocks_count += 1
+
         block_jpeg = idctn(Y_quant)
         X_jpeg[i:i+8, j:j+8] = block_jpeg
 
@@ -92,6 +168,38 @@ plt.subplot(121).imshow(X, cmap=plt.cm.gray)
 plt.title('Original')
 plt.subplot(122).imshow(X_jpeg, cmap=plt.cm.gray)
 plt.title('JPEG Compressed')
+plt.show()
+
+encoded_stream, codebook = huffman_encode(all_coeffs)
+# print(encoded_stream)  
+decoded_coeffs = huffman_decode(encoded_stream, codebook)
+
+# Reconstruim blocurile
+X_decoded = np.zeros_like(X)
+idx = 0
+block_index = 0
+
+for i in range(0, height, 8):
+    for j in range(0, width, 8):
+        if block_index >= blocks_count:
+            break
+
+        block_vec = decoded_coeffs[idx:idx+64]
+        idx += 64
+
+        block_vec = np.array(block_vec, dtype=float)
+        block_freq = inverse_zigzag(block_vec)
+
+        block_freq = block_freq * Q_jpeg
+        block_spatial = idctn(block_freq)
+
+        X_decoded[i:i+8, j:j+8] = block_spatial
+        block_index += 1
+
+plt.subplot(121).imshow(X_jpeg, cmap="gray")
+plt.title("JPEG (fara Huffman)")
+plt.subplot(122).imshow(X_decoded, cmap="gray")
+plt.title("Decodat din Huffman")
 plt.show()
 
 # exercitiul 2
